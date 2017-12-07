@@ -1,0 +1,99 @@
+{#
+Copyright 2017 Google Inc. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+#}
+
+# Dataset Properties
+{% set DATASET_NAME = "sales" %}
+{% set DATASET_RESOURCE = DATASET_NAME + "-dataset" %}
+
+# Table Properties
+{% set TRANSACTIONS_TABLE_NAME = "transactions" %}
+
+resources:
+# Sales Dataset
+- name: {{ DATASET_RESOURCE }}
+  type: bigquery.v2.dataset
+  properties:
+    datasetReference:
+      projectId: {{ env["project"] }}
+      datasetId: {{ DATASET_NAME }}
+    description: The {{ DATASET_NAME }} dataset holds all POS transactions and relevant customer dimensions.
+    location: US
+    access:
+    - role: OWNER
+      groupByEmail: data-owners@example.com
+    - role: READER
+      groupByEmail: data-readers@example.com
+
+# Transactions Table
+- name: {{ DATASET_NAME }}-{{ TRANSACTIONS_TABLE_NAME }}-table
+  type: bigquery.v2.table
+  properties:
+    datasetId: $(ref.{{ DATASET_RESOURCE }}.datasetReference.datasetId)
+    tableReference:
+      tableId: {{ TRANSACTIONS_TABLE_NAME }}
+    description: The {{ TRANSACTIONS_TABLE_NAME }} table holds all raw POS transactions sourced in real-time from retail locations.
+    timePartitioning:
+      type: DAY
+    schema:
+      fields:
+      - name: salesOrderKey
+        description: The unique identifier for the order.
+        type: STRING
+        mode: REQUIRED
+      - name: orderDate
+        description: The date of the order.
+        type: DATE
+        mode: REQUIRED
+      - name: customerKey
+        description: The unique identifier for the customer.
+        type: STRING
+        mode: REQUIRED
+      - name: salesOrderLines
+        description: The line items from the order.
+        type: RECORD
+        mode: REPEATED
+        fields:
+        - name: salesOrderLineKey
+          description: The unique identifier for the order line item.
+          type: STRING
+          mode: REQUIRED
+        - name: productKey
+          description: The unique identifier for the product.
+          type: STRING
+          mode: REQUIRED
+        - name: quantity
+          description: The number of products ordered.
+          type: INTEGER
+          mode: REQUIRED
+        - name: unitPrice
+          description: The price of an individual unit.
+          type: FLOAT
+          mode: REQUIRED
+        - name: totalPrice
+          description: The total cost of the item (quantity * unitPrice).
+          type: FLOAT
+          mode: REQUIRED
+
+
+
+
+
+
+
+
+
+
+
+
+
+

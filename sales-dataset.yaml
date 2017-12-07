@@ -1,0 +1,6 @@
+imports:
+- path: sales-dataset.jinja
+
+resources:
+- name: sales-dataset
+  type: sales-dataset.jinja
